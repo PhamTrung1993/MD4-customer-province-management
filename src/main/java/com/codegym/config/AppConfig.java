@@ -3,6 +3,7 @@ package com.codegym.config;
 
 
 import com.codegym.formatter.ProvinceFormatter;
+import com.codegym.repository.ICustomerRepository;
 import com.codegym.service.customer.CustomerService;
 import com.codegym.service.customer.ICustomerService;
 import com.codegym.service.province.IProvinceService;
@@ -18,6 +19,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -38,7 +40,7 @@ import java.util.Properties;
 @EnableWebMvc
 @EnableTransactionManagement
 @EnableJpaRepositories("com.codegym.repository")
-@ComponentScan("com.codegym.controller")
+@ComponentScan("com.codegym")
 public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
     private ApplicationContext applicationContext;
 
@@ -82,7 +84,7 @@ public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        dataSource.setUrl("jdbc:mysql://localhost:3306/customer?useUnicode=yes&characterEncoding=UTF-8");
+        dataSource.setUrl("jdbc:mysql://localhost:3306/customer");
         dataSource.setUsername("root");
         dataSource.setPassword("123456");
         return dataSource;
@@ -95,17 +97,17 @@ public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
     }
 
     @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean() {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource());
-        em.setPackagesToScan(new String[]{"com.codegym.model"});
-        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        em.setPackagesToScan("com.codegym.model");
+        JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
-        em.setJpaProperties(properties());
+        em.setJpaProperties(additionalProperties());
         return em;
     }
 
-    Properties properties() {
+    public Properties additionalProperties() {
         Properties properties = new Properties();
         properties.setProperty("hibernate.hbm2ddl.auto", "update");
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL5Dialect");
@@ -118,7 +120,7 @@ public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
         transactionManager.setEntityManagerFactory(emf);
         return transactionManager;
     }
-
+    //    Đăng ký formatter bằng cách override phương thức addFormatter() trong lớp ApplicationConfig
     @Override
     public void addFormatters(FormatterRegistry registry) {
         registry.addFormatter(new ProvinceFormatter(applicationContext.getBean(ProvinceService.class)));
@@ -131,4 +133,5 @@ public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
     public IProvinceService provinceService() {
         return new ProvinceService();
     }
+
 }

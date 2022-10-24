@@ -1,6 +1,7 @@
 package com.codegym.service.customer;
 
 import com.codegym.model.Customer;
+import com.codegym.model.Province;
 import com.codegym.repository.ICustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,5 +31,9 @@ public class CustomerService implements ICustomerService{
     @Override
     public void remove(Long id) {
         customerRepository.deleteById(id);
+    }
+    @Override
+    public Iterable<Customer> findAllByProvince(Province province) {
+        return customerRepository.findAllByProvince(province);
     }
 }
